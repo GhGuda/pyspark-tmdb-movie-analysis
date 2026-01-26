@@ -1,43 +1,117 @@
 from pyspark.sql import DataFrame
-from pyspark.sql.window import Window
-from pyspark.sql.functions import col, row_number
+from pyspark.sql.functions import col, lit, when, avg, count, expr, sum as _sum
 
 
-def top_movies_by_metric(
+def rank_movies(
     df: DataFrame,
     metric: str,
-    top_n: int = 10
+    top: bool = True,
+    n: int = 10,
+    kpi_label: str | None = None
 ) -> DataFrame:
     """
-    Returns top N movies ranked by a given metric.
-
-    Parameters:
-    - metric: column name to rank by (e.g. 'roi', 'revenue_musd')
-    - top_n: number of top records to return
+    Rank movies by a metric.
     """
 
-    window = Window.orderBy(col(metric).desc())
+    ordered_df = df.orderBy(
+        col(metric).desc() if top else col(metric).asc()
+    )
+
+    ranked_df = ordered_df.limit(n)
+
+    if kpi_label:
+        ranked_df = ranked_df.withColumn("kpi", lit(kpi_label))
+
+    return ranked_df
+
+
+
+def best_rated_sci_fi_movies(df: DataFrame) -> DataFrame:
+    """
+    Retrieve best-rated Sci-Fi Action movies starring Bruce Willis.
+    """
+    return (
+        df
+        .filter(col("genres").rlike("(?i)Science Fiction"))
+        .filter(col("genres").rlike("(?i)Action"))
+        .filter(col("cast").rlike("(?i)Bruce Willis"))
+        .orderBy(col("vote_average").desc())
+    )
+    
+    
+def uma_thurman_tarantino_movies(df: DataFrame) -> DataFrame:
+    """
+    Retrieve movies featuring Uma Thurman and directed by Quentin Tarantino.
+    """
+    return (
+        df
+        .filter(col("cast").rlike("(?i)Uma Thurman"))
+        .filter(col("director").rlike("(?i)Quentin Tarantino"))
+        .orderBy(col("runtime").asc())
+    )
+    
+
+
+def compare_franchise_vs_standalone_performance(df: DataFrame) -> DataFrame:
+    """
+    Compare performance of franchise movies vs standalone movies.
+    """
+    df = df.withColumn(
+        "franchise_type",
+        when(col("belongs_to_collection").isNotNull(), "Franchise")
+        .otherwise("Standalone")
+    )
 
     return (
         df
-        .withColumn("rank", row_number().over(window))
-        .filter(col("rank") <= top_n)
+        .groupBy("franchise_type")
+        .agg(
+            avg("revenue_musd").alias("mean_revenue"),
+            expr("percentile_approx(roi, 0.5)").alias("median_roi"),
+            avg("budget_musd").alias("mean_budget"),
+            avg("popularity").alias("mean_popularity"),
+            avg("vote_average").alias("mean_rating")
+        )
+        .orderBy(col("mean_revenue").desc())
     )
+    
+    
 
-
-def bottom_movies_by_metric(
-    df: DataFrame,
-    metric: str,
-    bottom_n: int = 10
-) -> DataFrame:
+def most_successful_franchises(df: DataFrame) -> DataFrame:
     """
-    Returns bottom N movies ranked by a given metric.
+    Identify the most successful movie franchises based on average revenue.
     """
-
-    window = Window.orderBy(col(metric).asc())
-
     return (
         df
-        .withColumn("rank", row_number().over(window))
-        .filter(col("rank") <= bottom_n)
+        .filter(col("belongs_to_collection").isNotNull())
+        .groupBy("belongs_to_collection")
+        .agg(
+            count("id").alias("total_movies"),
+            _sum("budget_musd").alias("total_budget"),
+            avg("budget_musd").alias("mean_budget"),
+            _sum("revenue_musd").alias("total_revenue"),
+            avg("revenue_musd").alias("mean_revenue"),
+            avg("vote_average").alias("mean_rating")
+        )
+        .orderBy(col("mean_revenue").desc())
     )
+    
+    
+    
+def most_successful_directors(df: DataFrame) -> DataFrame:
+    """
+    Identify the most successful directors based on total revenue.
+    """
+    return (
+        df
+        .filter(col("director").isNotNull())
+        .groupBy("director")
+        .agg(
+            count("id").alias("total_movies"),
+            _sum("revenue_musd").alias("total_revenue"),
+            avg("vote_average").alias("mean_rating")
+        )
+        .orderBy(col("total_revenue").desc())
+    )
+
+

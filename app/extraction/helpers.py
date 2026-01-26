@@ -1,6 +1,9 @@
 import json
 from pathlib import Path
-import logging
+from app.utils.logging import get_logger
+
+
+logger = get_logger("helpers")
 
 def save_json(data, filepath):
     try:
@@ -8,7 +11,7 @@ def save_json(data, filepath):
         with open(filepath, "w") as f:
             json.dump(data, f, indent=4)
     except Exception as e:
-        logging.critical(f"Error saving JSON to {filepath}: {e}")
+        logger.critical(f"Error saving JSON to {filepath}: {e}")
         return None
 
 def load_json(filepath):
@@ -16,5 +19,5 @@ def load_json(filepath):
         with open(filepath) as f:
             return json.load(f)
     except FileNotFoundError:
-        logging.critical(f"File not found: {filepath}")
+        logger.critical(f"File not found: {filepath}")
         return None

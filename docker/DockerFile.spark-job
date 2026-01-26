@@ -24,8 +24,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY app ./app
-COPY pipeline.py .
+COPY pipeline ./pipeline
 
 # Spark is the entrypoint (batch execution model)
 ENTRYPOINT ["/opt/spark/bin/spark-submit"]
-CMD ["--master", "local[*]", "pipeline.py"]
+CMD ["--master", "local[*]", "pipeline/tmdb_batch_pipeline.py"]

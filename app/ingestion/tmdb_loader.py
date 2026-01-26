@@ -6,7 +6,8 @@ from pyspark.sql.types import (
     IntegerType,
     DoubleType,
     BooleanType,
-    ArrayType
+    ArrayType,
+    LongType
 )
 import os
 
@@ -19,17 +20,26 @@ def _tmdb_schema() -> StructType:
     to avoid silent data corruption and schema drift.
     """
     return StructType([
-        StructField("id", IntegerType(), False),
+        StructField("id", LongType(), False),
         StructField("title", StringType(), True),
         StructField("release_date", StringType(), True),
-        StructField("budget", DoubleType(), True),
-        StructField("revenue", DoubleType(), True),
+        StructField("budget", LongType(), True),
+        StructField("revenue", LongType(), True),
         StructField("runtime", IntegerType(), True),
         StructField("vote_average", DoubleType(), True),
         StructField("vote_count", IntegerType(), True),
         StructField("original_language", StringType(), True),
         StructField("adult", BooleanType(), True),
-        StructField("genres", ArrayType(StringType()), True),
+        StructField(
+            "genres",
+            ArrayType(
+                StructType([
+                    StructField("id", IntegerType(), True),
+                    StructField("name", StringType(), True),
+                ])
+            ),
+            True
+        )
     ])
 
 
@@ -51,6 +61,7 @@ def load_tmdb_movies(spark: SparkSession) -> DataFrame:
     df = (
         spark.read
         .schema(_tmdb_schema())
+        .option("multiLine", "true")
         .json(raw_path)
     )
 

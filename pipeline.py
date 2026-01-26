@@ -1,17 +1,12 @@
 from app.utils.logging import get_logger
-from app.spark.session import get_spark_session
+from app.spark_job.session import get_spark_session
 from app.ingestion.tmdb_loader import load_tmdb_movies
 from app.transformations.kpis import (
-    add_budget_revenue_musd,
     add_profit,
     add_roi
 )
-from app.analytics.rankings import top_movies_by_metric
-import os
-from app.utils.data_quality import (
-    check_not_empty,
-    check_no_nulls
-)
+
+
 
 
 
@@ -29,12 +24,27 @@ def main() -> None:
         # 2. Load raw TMDB data
         logger.info("Loading TMDB raw data")
         movies_df = load_tmdb_movies(spark)
+
+        movies_df.printSchema()
+        movies_df.show(5, truncate=False)
+        movies_df.select("id").show(5)
+        movies_df.count()
+
+        movies_df = movies_df.filter(col("id").isNotNull())
+        movies_df = movies_df.filter(col("title").isNotNull())
+
         
         check_not_empty(movies_df, "movies_df")
         check_no_nulls(
             movies_df,
             columns=["id", "title"],
             df_name="movies_df"
+        )
+        
+        movies_df = (
+            movies_df
+            .withColumn("budget", col("budget").cast("double"))
+            .withColumn("revenue", col("revenue").cast("double"))
         )
 
 

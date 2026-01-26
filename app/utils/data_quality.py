@@ -1,5 +1,6 @@
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
+from typing import List
 from app.utils.logging import get_logger
 
 
@@ -17,7 +18,7 @@ def check_not_empty(df: DataFrame, df_name: str) -> None:
     logger.info(f"{df_name} passed non-empty check ({count} records)")
 
 
-def check_no_nulls(df: DataFrame, columns: list[str], df_name: str) -> None:
+def check_no_nulls(df: DataFrame, columns: List[str], df_name: str) -> None:
     """
     Ensures specified columns do not contain nulls.
     """

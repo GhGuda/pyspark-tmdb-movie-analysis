@@ -21,7 +21,7 @@ def add_profit(df: DataFrame) -> DataFrame:
     Adds profit KPI: revenue minus budget.
     """
     return df.withColumn(
-        "profit_musd",
+        "profit",
         col("revenue_musd") - col("budget_musd")
     )
 
@@ -30,7 +30,7 @@ def add_roi(df: DataFrame) -> DataFrame:
     """
     Adds ROI (Return on Investment).
 
-    ROI = revenue / budget
+    ROI = (Revenue - Budget) / Budget
 
     Null-safe and division-by-zero safe.
     """
@@ -38,6 +38,6 @@ def add_roi(df: DataFrame) -> DataFrame:
         "roi",
         when(
             col("budget_musd") > 0,
-            col("revenue_musd") / col("budget_musd")
-        ).otherwise(None)
+            col("profit") / col("budget_musd")
+        )
     )
