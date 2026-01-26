@@ -1,0 +1,31 @@
+# ============================================================
+# Dockerfile
+#
+# Spark-native container for TMDB batch analytics job.
+# Uses Spark as the primary runtime and executes via /opt/spark/bin/spark-submit.
+# ============================================================
+
+FROM apache/spark:3.5.1
+
+# Run as root to install Python dependencies
+USER root
+
+# Ensure Python logs are flushed immediately
+ENV PYTHONUNBUFFERED=1
+
+# Set application working directory
+WORKDIR /opt/app
+ENV PYTHONPATH=/opt/app
+
+
+# Copy and install Python dependencies (non-Spark only)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY app ./app
+COPY pipeline.py .
+
+# Spark is the entrypoint (batch execution model)
+ENTRYPOINT ["/opt/spark/bin/spark-submit"]
+CMD ["--master", "local[*]", "pipeline.py"]

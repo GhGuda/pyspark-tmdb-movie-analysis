@@ -1,0 +1,125 @@
+Final Report: Summary, Methodology & Key Insights
+1. Overview
+
+This project analyzes movie datasets to uncover financial, popularity, and performance trends across the film industry. Using Python, Pandas, and Matplotlib, the workflow covers data cleaning, exploratory analysis, KPI creation, and visualization of budget, revenue, ROI, rating, and genre-based patterns.
+
+2. Methodology
+a. Data Cleaning
+
+Handled missing values in budget, revenue, genres, release_date, and cast/director columns.
+
+Converted numerical fields (budget, revenue, runtime) to proper numeric types.
+
+Transformed genres, production_companies, and cast into lists.
+
+Extracted release_year using df['release_date'].dt.year.
+
+Removed inconsistencies (e.g., zero budgets).
+
+b. Feature Engineering
+
+Profit = Revenue – Budget
+
+ROI = Revenue / Budget
+
+Cast Size extracted from cast list
+
+Is_Franchise = belongs_to_collection not null
+
+Decade, genre expansions, popularity groups, etc.
+
+c. KPI Computation
+
+You computed rankings for:
+
+Highest Revenue
+
+Highest Budget
+
+Highest & Lowest Profit
+
+Highest & Lowest ROI (with Budget ≥ $10M)
+
+Most Voted
+
+Highest & Lowest Rated (vote_count ≥ 10)
+
+d. Visualizations (Step 4)
+
+Using Pandas + Matplotlib, you created:
+
+Revenue vs Budget
+Shows correlation between spending and earnings.
+
+ROI Distribution by Genre
+Displays which genres deliver the best return.
+
+Popularity vs Rating
+Helps analyze if highly rated films are also the most popular.
+
+Yearly Box Office Trends
+Shows growth patterns and boom years.
+
+Franchise vs Standalone Performance
+Compares consistency and profitability between sequels/franchises and single titles.
+
+3. Key Insights
+Financial Insights
+
+High-budget movies generally produce high revenue, but ROI varies wildly.
+
+Horror and Thriller often have the highest ROI due to low budgets.
+
+Action & Adventure lead overall revenue but also have the highest spending.
+
+Genre Analysis
+
+Action, Adventure, Fantasy dominate in raw revenue.
+
+Romance and Comedy see lower profits but maintain steady audiences.
+
+Animation shows high consistency — low count but strong revenue per film.
+
+Popularity vs Rating
+
+Popularity doesn’t always match rating.
+
+Some highly rated films have low popularity due to niche audiences.
+
+Yearly Trends
+
+Marked growth in budgets and revenue after 2010.
+
+A shift toward franchise-heavy lineups in recent years.
+
+Franchise vs Standalone
+
+Franchise movies earn 2–5x more on average than standalone titles.
+
+Standalone films have more rating diversity (both very high and very low).
+
+4. Limitations
+
+Missing values in revenue/budget affect accuracy.
+
+Genre lists from some datasets are inconsistent.
+
+ROI can be inflated for tiny-budget films.
+
+5. Conclusion
+
+This analysis provides a strong understanding of financial and audience-performance dynamics in the movie industry. The results show that:
+
+Budget matters but doesn’t guarantee success.
+
+Genre strongly influences ROI.
+
+Franchises dominate revenue.
+
+Popularity and rating measure different aspects of audience engagement.
+
+The methodology and visualizations create a framework that can be extended with machine learning models such as:
+
+Revenue prediction
+
+Genre-based clustering
