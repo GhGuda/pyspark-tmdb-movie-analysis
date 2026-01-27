@@ -30,6 +30,15 @@ def _tmdb_schema() -> StructType:
         StructField("vote_count", IntegerType(), True),
         StructField("original_language", StringType(), True),
         StructField("adult", BooleanType(), True),
+        StructField("popularity", DoubleType(), True),
+        StructField(
+            "belongs_to_collection",
+            StructType([
+                StructField("id", IntegerType(), True),
+                StructField("name", StringType(), True)
+            ]),
+            True
+        ),
         StructField(
             "genres",
             ArrayType(
@@ -38,6 +47,33 @@ def _tmdb_schema() -> StructType:
                     StructField("name", StringType(), True),
                 ])
             ),
+            True
+        ),
+        StructField(
+            "credits",
+            StructType([
+                StructField(
+                    "cast",
+                    ArrayType(
+                        StructType([
+                            StructField("id", IntegerType(), True),
+                            StructField("name", StringType(), True)
+                        ])
+                    ),
+                    True
+                ),
+        StructField(
+            "crew",
+            ArrayType(
+                StructType([
+                    StructField("id", IntegerType(), True),
+                    StructField("name", StringType(), True),
+                    StructField("job", StringType(), True)
+                ])
+            ),
+            True
+        )
+            ]),
             True
         )
     ])

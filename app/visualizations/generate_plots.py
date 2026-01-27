@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 
 OUTPUT_DIR = os.getenv(
     "TMDB_PLOTS_PATH",
+    "data/plots"
 )
+
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -13,6 +15,8 @@ def plot_revenue_vs_budget(df: pd.DataFrame):
     """
     Generates and saves a scatter plot of Revenue vs Budget.
     """
+    df = df.copy()
+    
     plt.figure(figsize=(8, 6))
 
     plt.scatter(
@@ -35,6 +39,8 @@ def plot_roi_distribution_by_genre(df: pd.DataFrame):
     """
     Generates and saves a box plot of ROI distribution by genre.
     """
+    df = df.copy()
+
     exploded = (
         df[["genres", "roi"]]
         .dropna()
@@ -73,6 +79,7 @@ def plot_popularity_vs_rating(df: pd.DataFrame):
     """
     Generates and saves a scatter plot of Popularity vs Average Rating.
     """
+    df = df.copy()
     plt.figure(figsize=(8, 6))
 
     plt.scatter(
@@ -93,8 +100,15 @@ def plot_popularity_vs_rating(df: pd.DataFrame):
 
 def plot_yearly_box_office_trends(df: pd.DataFrame):
     """
-    Generates and saves a line plot of yearly average box office revenue.
+    Generates and saves a line plot of yearly box office trends.
     """
+    df = df.copy()
+
+    df["release_date"] = pd.to_datetime(
+        df["release_date"],
+        errors="coerce"
+    )
+
     yearly = (
         df.dropna(subset=["release_date", "revenue_musd"])
         .assign(year=lambda x: x["release_date"].dt.year)
@@ -115,10 +129,12 @@ def plot_yearly_box_office_trends(df: pd.DataFrame):
 
 
 
+
 def plot_franchise_vs_standalone(df: pd.DataFrame):
     """
     Generates and saves a bar plot comparing franchise movies vs standalone movies.
     """
+    df = df.copy()
     plt.figure(figsize=(6, 5))
 
     plt.bar(

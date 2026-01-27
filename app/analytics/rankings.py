@@ -1,5 +1,6 @@
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, lit, when, avg, count, expr, sum as _sum
+from typing import Optional
 
 
 def rank_movies(
@@ -7,7 +8,7 @@ def rank_movies(
     metric: str,
     top: bool = True,
     n: int = 10,
-    kpi_label: str | None = None
+    kpi_label: Optional[str] = None
 ) -> DataFrame:
     """
     Rank movies by a metric.
@@ -19,7 +20,7 @@ def rank_movies(
 
     ranked_df = ordered_df.limit(n)
 
-    if kpi_label:
+    if kpi_label is not None:
         ranked_df = ranked_df.withColumn("kpi", lit(kpi_label))
 
     return ranked_df

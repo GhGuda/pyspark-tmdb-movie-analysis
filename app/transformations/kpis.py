@@ -1,21 +1,6 @@
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, when
 
-
-def add_budget_revenue_musd(df: DataFrame) -> DataFrame:
-    """
-    Adds budget and revenue in millions of USD.
-
-    Standardizing units early avoids repeated conversions
-    and inconsistent KPI definitions downstream.
-    """
-    return (
-        df
-        .withColumn("budget_musd", col("budget") / 1_000_000)
-        .withColumn("revenue_musd", col("revenue") / 1_000_000)
-    )
-
-
 def add_profit(df: DataFrame) -> DataFrame:
     """
     Adds profit KPI: revenue minus budget.
@@ -30,7 +15,7 @@ def add_roi(df: DataFrame) -> DataFrame:
     """
     Adds ROI (Return on Investment).
 
-    ROI = (Revenue - Budget) / Budget
+    ROI = (Revenue - Budget) / Budget_musd
 
     Null-safe and division-by-zero safe.
     """

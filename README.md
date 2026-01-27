@@ -1,121 +1,223 @@
-# TMDB Movie Analysis
+TMDB Movie Analysis (PySpark Pipeline)
 
-This project is a comprehensive ETL (Extract, Transform, Load) and analysis tool that fetches movie details from The Movie Database (TMDB), stores raw JSON data, and provides various KPI (Key Performance Indicator) helpers along with an analysis notebook for deeper insights.
+This project is a production-ready PySpark batch pipeline for extracting, enriching, and analyzing movie data from The Movie Database (TMDB).
+It follows a Bronze → Silver → Gold architecture, persists data as Parquet, and generates analytical visualizations using Pandas + Matplotlib.
 
-## Contents
-- [Project Structure](#project-structure)
-- [Quickstart](#quickstart)
-- [Usage](#usage)
-- [Key Files & Helpers](#key-files--helpers)
-- [Notes](#notes)
+📌 Architecture Overview
+TMDB API
+   ↓
+Bronze (Raw JSON)
+   ↓
+Silver (Enriched Movies)
+   ↓
+Gold (KPIs & Aggregations)
+   ↓
+Visualizations (PNG)
 
-## Project Structure
-- [configs/settings.py](configs/settings.py) — Configuration file with environment variables.
-- [scripts/extraction/fetch_api_data.py](scripts/extraction/fetch_api_data.py) — Script for extracting movie data from TMDB.
-- [scripts/helpers.py](scripts/helpers.py) — Utility functions for saving and loading JSON data.
-- [scripts/kpi.py](scripts/kpi.py) — Functions for calculating KPIs related to movie performance.
-- [notebooks/analysis.ipynb](notebooks/analysis.ipynb) — Main analysis notebook for data exploration and visualization.
-- [raw_data/](raw_data/) — Directory containing raw JSON responses from TMDB (e.g., [raw_data/movie_299534.json](raw_data/movie_299534.json)).
-- [requirements.txt](requirements.txt) — List of dependencies required for the project.
-- .env — Local environment file for storing sensitive information like API keys.
 
-## Quickstart
-1. Create or activate a virtual environment (or use the provided `env/`).
-2. Install dependencies:
-   ```sh
-   pip install -r requirements.txt
-   ```
-3. Add your TMDB API key to the `.env` file as `API_KEY` or set it as an environment variable.
-4. Run the extraction script:
-   ```sh
-   python scripts/extraction/fetch_api_data.py
-   ```
-   This will fetch movie data and save the JSON files to the `raw_data/` directory.
+Bronze: Raw TMDB JSON responses
 
-## Usage
-- Open the [notebooks/analysis.ipynb](notebooks/analysis.ipynb) to reproduce the data cleaning, merging, and KPI calculations.
-- Utilize the KPI helpers in [scripts/kpi.py](scripts/kpi.py) to rank movies and compute profit/ROI.
+Silver: Cleaned, flattened, analysis-ready movie data
 
-### Example Usage
-- Load raw JSON data into a DataFrame (demonstrated in the notebook).
-- Call `add_profit_columns` to compute profit and ROI.
-- Use `rank_movies` to retrieve the top-N movies based on a specified metric.
+Gold: KPIs, rankings, and aggregations
 
-## Key Files & Helpers
-- **configs/settings.py** exposes:
-  - `TMDB_API_KEY`
-  - `BASE_URL`
-  - `RAW_DATA_DIR`
-  
-- **scripts/extraction/fetch_api_data.py** contains:
-  - `fetch_movie_data`
-  - `run_extraction`
-  
-- **scripts/helpers.py** contains:
-  - `save_json`
-  - `load_json`
-  
-- **scripts/kpi.py** contains:
-  - `rank_movies`
-  - `add_profit_columns`
+Visualizations: Offline plots generated from Parquet outputs
 
-## Notes
-- Raw JSON files are stored in the `raw_data/` directory. Examples include [raw_data/movie_299534.json](raw_data/movie_299534.json) and [raw_data/movie_140607.json](raw_data/movie_140607.json).
-- The helpers ensure that JSON data is written in a readable format. Refer to `save_json` for details.
-- Configuration settings are read from the `.env` file using `python-dotenv`. See `requirements.txt` for more information.
+📂 Project Structure
+.
+├── app/
+│   ├── ingestion/
+│   │   └── tmdb_loader.py          # Spark JSON ingestion
+│   ├── transformations/
+│   │   ├── enrichments.py          # Silver transformations
+│   │   └── kpis.py                 # KPI calculations (Gold)
+│   ├── analytics/
+│   │   └── rankings.py             # Rankings & aggregations
+│   ├── spark_job/
+│   │   └── session.py              # Spark session factory
+│   ├── utils/
+│   │   ├── logging.py              # Structured logging
+│   │   └── data_quality.py         # Data quality checks
+│   ├── visualizations/
+│   │   ├── generate_plots.py       # Matplotlib plots
+│   │   └── run_visualizations.py   # Visualization runner
+│
+├── pipeline/
+│   └── tmdb_batch_pipeline.py      # Main Spark batch pipeline
+│
+├── data/
+│   ├── raw_data/                   # Bronze (raw TMDB JSON)
+│   ├── processed/
+│   │   ├── movies_enriched/        # Silver Parquet
+│   │   └── analytics/              # Gold Parquet
+│   └── plots/                      # Generated PNG plots
+│
+├── DockerFile.spark-job             # Spark batch Docker image
+├── requirements.spark.txt           # Spark dependencies
+├── requirements.viz.txt             # Visualization dependencies
+├── .env                             # Environment variables
+└── README.md
 
-## References
-- Configuration settings: [`TMDB_API_KEY`, `BASE_URL`, `RAW_DATA_DIR`](configs/settings.py)
-- Data extraction functions: [`fetch_movie_data`, `run_extraction`](scripts/extraction/fetch_api_data.py)
-- JSON helpers: [`save_json`, `load_json`](scripts/helpers.py)
-- KPI functions: [`rank_movies`, `add_profit_columns`](scripts/kpi.py)
+⚙️ Technologies Used
 
-## Quickstart
-1. Create / activate a virtual environment (or use the provided `env/`).
-2. Install dependencies:
-```sh
-pip install -r 
+PySpark 3.5
 
-3. Add your TMDB API key to .env as API_KEY (or set env var).
-4. Run extraction:
-python
+Apache Spark (Dockerized)
 
-This will call the functions in scripts/fetch_api_data.py and save JSON to the raw_data/ folder.
+Parquet
 
-Usage
-Open notebooks/01_api_extraction.ipynb to reproduce cleaning, merging and KPI calculations.
-Use KPI helpers in scripts/kpi.py to rank movies and compute profit/ROI.
-Example:
+Pandas & Matplotlib (visualizations only)
 
-Load raw JSON into a DataFrame (notebook shows this).
-Call add_profit_columns to compute profit and roi.
-Call rank_movies to get top-N by a metric.
-Key files & helpers
-configs/settings.py exposes:
-TMDB_API_KEY
-BASE_URL
-RAW_DATA_DIR
-scripts/fetch_api_data.py contains:
-fetch_movie_data
-run_extraction
-scripts/helpers.py contains:
-save_json
-load_json
-scripts/kpi.py contains:
-rank_movies
-add_profit_columns
-Exploratory analysis available in notebooks/01_api_extraction.ipynb.
-Notes
-Raw JSON files are in raw_data/. Examples: raw_data/movie_299534.json, raw_data/movie_140607.json.
-Helpers write readable JSON. See save_json.
-Config reads .env via python-dotenv. See requirements.txt.
+TMDB REST API
 
-References (open files / symbols)
--  — [`TMDB_API_KEYBASE_URLRAW_DATA_DIR`](configs/settings.py)  
--  — [`fetch_movie_datarun_extraction`](scripts/fetch_api_data.py)  
--  — [`save_jsonload_json`](scripts/helpers.py)  
--  — [`rank_moviesadd_profit_columns`](scripts/kpi.py)  
--   
--   
--   
-- , , 
+Docker
+
+🔑 Environment Variables
+
+Create a .env file:
+
+TMDB_API_KEY=your_api_key_here
+TMDB_RAW_PATH=/opt/app/data/raw_data
+TMDB_SILVER_PATH=/opt/app/data/processed/movies_enriched
+TMDB_GOLD_PATH=/opt/app/data/processed/analytics
+TMDB_PLOTS_PATH=data/plots
+
+🚀 Quickstart (Spark Pipeline)
+1️⃣ Build Docker Image
+docker build -t tmdb-spark-batch -f DockerFile.spark-job .
+
+2️⃣ Run Spark Batch Job
+docker run --rm \
+  -v ${PWD}/data:/opt/app/data \
+  tmdb-spark-batch
+
+
+This will:
+
+Read raw TMDB JSON (Bronze)
+
+Produce enriched movies (Silver)
+
+Compute KPIs & analytics (Gold)
+
+Persist all outputs as Parquet
+
+🧪 Silver Layer (Enrichment)
+
+The Silver dataset includes:
+
+Flattened nested TMDB fields
+
+Cleaned numeric columns
+
+Converted monetary values to million USD
+
+Extracted genres, collections, cast, crew
+
+Derived dimensions such as franchise_type
+
+Output:
+
+data/processed/movies_enriched/
+
+📊 Gold Layer (Analytics & KPIs)
+KPIs
+
+Profit = Revenue − Budget
+
+ROI = Profit / Budget
+
+Budget & revenue normalized to million USD
+
+Aggregations
+
+Franchise vs Standalone performance
+
+Most successful franchises
+
+Most successful directors
+
+Top movies by ROI
+
+Outputs:
+
+data/processed/analytics/
+├── movies_with_kpis
+├── top_movies_by_roi
+├── franchise_vs_standalone
+├── most_successful_franchises
+└── most_successful_directors
+
+📈 Visualizations (Step 4)
+
+Visualizations are generated after the Spark job, using Parquet outputs.
+
+Run Visualizations
+py -m app.visualizations.run_visualizations
+
+Generated Plots
+
+Revenue vs Budget
+
+ROI Distribution by Genre
+
+Popularity vs Rating
+
+Yearly Box Office Trends
+
+Franchise vs Standalone Comparison
+
+Output:
+
+data/plots/
+├── revenue_vs_budget.png
+├── roi_distribution_by_genre.png
+├── popularity_vs_rating.png
+├── yearly_box_office_trends.png
+└── franchise_vs_standalone.png
+
+🧹 Data Quality Checks
+
+The pipeline enforces:
+
+Non-empty datasets
+
+Mandatory keys (id, title) in Silver
+
+Safe handling of nulls in KPIs
+
+Schema consistency across layers
+
+Failures stop the pipeline early with structured logs.
+
+🧠 Design Principles
+
+Spark for computation
+
+Parquet for storage
+
+Pandas only for plotting
+
+No transformations inside notebooks
+
+Clear separation of Bronze / Silver / Gold
+
+Function-based Spark transformations (.transform)
+
+📌 Notes
+
+Spark writes Parquet as directories, not single files.
+
+Visualization scripts auto-detect available datasets.
+
+Container paths (/opt/app/...) are overridden locally via env vars.
+
+This project is suitable for production pipelines and portfolios.
+
+✅ Status
+
+✔ End-to-end pipeline
+✔ Dockerized Spark job
+✔ Clean data contracts
+✔ Reproducible analytics
+✔ Visual reporting
