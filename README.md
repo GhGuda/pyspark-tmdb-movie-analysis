@@ -141,14 +141,14 @@ Most successful directors
 Top movies by ROI
 
 Outputs:
-
+```bash
 data/processed/analytics/
 ├── movies_with_kpis
 ├── top_movies_by_roi
 ├── franchise_vs_standalone
 ├── most_successful_franchises
 └── most_successful_directors
-
+```
 📈 Visualizations (Step 4)
 
 Visualizations are generated after the Spark job, using Parquet outputs.
