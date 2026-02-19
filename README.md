@@ -24,6 +24,7 @@ Gold: KPIs, rankings, and aggregations
 Visualizations: Offline plots generated from Parquet outputs
 
 📂 Project Structure
+```bash
 .
 ├── app/
 │   ├── ingestion/
@@ -57,7 +58,7 @@ Visualizations: Offline plots generated from Parquet outputs
 ├── requirements.viz.txt             # Visualization dependencies
 ├── .env                             # Environment variables
 └── README.md
-
+```
 ⚙️ Technologies Used
 
 PySpark 3.5
@@ -168,14 +169,14 @@ Yearly Box Office Trends
 Franchise vs Standalone Comparison
 
 Output:
-
+```bash
 data/plots/
 ├── revenue_vs_budget.png
 ├── roi_distribution_by_genre.png
 ├── popularity_vs_rating.png
 ├── yearly_box_office_trends.png
 └── franchise_vs_standalone.png
-
+```
 🧹 Data Quality Checks
 
 The pipeline enforces:
