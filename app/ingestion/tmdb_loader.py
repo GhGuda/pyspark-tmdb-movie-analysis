@@ -79,6 +79,13 @@ def _tmdb_schema() -> StructType:
     ])
 
 
+def tmdb_raw_schema() -> StructType:
+    """
+    Public accessor for the TMDB raw schema.
+    """
+    return _tmdb_schema()
+
+
 def load_tmdb_movies(spark: SparkSession) -> DataFrame:
     """
     Loads TMDB movie data into a Spark DataFrame.
