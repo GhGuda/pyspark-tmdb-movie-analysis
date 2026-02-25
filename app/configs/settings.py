@@ -21,7 +21,7 @@ RAW_DATA_DIR = Path(
 )
 
 
-def _parse_movie_ids(raw_ids: str | None) -> List[int]:
+def parse_movie_ids(raw_ids: str | None) -> List[int]:
     if not raw_ids:
         return []
     ids: List[int] = []
@@ -36,4 +36,4 @@ def _parse_movie_ids(raw_ids: str | None) -> List[int]:
     return ids
 
 
-TMDB_MOVIE_IDS = _parse_movie_ids(os.getenv("TMDB_MOVIE_IDS"))
+TMDB_MOVIE_IDS = parse_movie_ids(os.getenv("TMDB_MOVIE_IDS"))
