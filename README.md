@@ -29,6 +29,8 @@ Create a `.env` file (copy from `.env.example`) with the following entries:
 TMDB_API_KEY=your_api_key_here
 TMDB_BASE_URL=https://api.themoviedb.org/3/movie/
 TMDB_MOVIE_IDS=299534,19995,140607
+TMDB_MAX_WORKERS=5
+TMDB_RATE_LIMIT_PER_SEC=4
 TMDB_RAW_PATH=/opt/app/data/raw_data
 TMDB_SILVER_PATH=/opt/app/data/processed/movies_enriched
 TMDB_GOLD_PATH=/opt/app/data/processed/analytics

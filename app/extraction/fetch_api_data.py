@@ -1,4 +1,7 @@
+import os
+import random
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Iterable
 
 import requests
@@ -12,12 +15,15 @@ logger = get_logger("fetch-api-data")
 
 DEFAULT_TIMEOUT = 10
 DEFAULT_RETRIES = 3
+DEFAULT_MAX_WORKERS = 5
+DEFAULT_RATE_LIMIT_PER_SEC = 4
 
 
 def fetch_movie_data(
     movie_id: int,
     retries: int = DEFAULT_RETRIES,
     timeout: int = DEFAULT_TIMEOUT,
+    backoff_base: float = 1.0,
 ) -> dict | None:
     """
     Fetch movie data from TMDB with retries.
@@ -39,7 +45,8 @@ def fetch_movie_data(
             logger.warning(
                 f"Attempt {attempt}/{retries} failed for movie {movie_id}: {e}"
             )
-            time.sleep(2)
+            sleep_for = backoff_base * (2 ** (attempt - 1)) + random.uniform(0, 0.5)
+            time.sleep(sleep_for)
 
     logger.error(f"All retries failed for movie {movie_id}")
     return None
@@ -63,14 +70,41 @@ def run_extraction() -> None:
         logger.error("TMDB API key missing. Set API_KEY in your environment.")
         return
 
-    for movie_id in get_movie_ids():
-        data = fetch_movie_data(movie_id)
+    movie_ids = list(get_movie_ids())
+    if not movie_ids:
+        return
 
-        if data:
-            save_json(
-                data,
-                f"{settings.RAW_DATA_DIR}/movie_{movie_id}.json"
-            )
+    max_workers = int(
+        os.getenv("TMDB_MAX_WORKERS", str(DEFAULT_MAX_WORKERS))
+    )
+    rate_limit = float(
+        os.getenv("TMDB_RATE_LIMIT_PER_SEC", str(DEFAULT_RATE_LIMIT_PER_SEC))
+    )
+    delay_between_requests = 1.0 / rate_limit if rate_limit > 0 else 0.0
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {}
+        for movie_id in movie_ids:
+            futures[executor.submit(fetch_movie_data, movie_id)] = movie_id
+            if delay_between_requests:
+                time.sleep(delay_between_requests)
+
+        for future in as_completed(futures):
+            movie_id = futures[future]
+            try:
+                data = future.result()
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Request failed for movie {movie_id}: {e}")
+                continue
+            except Exception as e:
+                logger.exception(f"Unexpected error for movie {movie_id}: {e}")
+                continue
+
+            if data:
+                save_json(
+                    data,
+                    f"{settings.RAW_DATA_DIR}/movie_{movie_id}.json"
+                )
 
 
 if __name__ == "__main__":
