@@ -21,19 +21,18 @@ from app.analytics.rankings import (
     most_successful_franchises,
     most_successful_directors,
     rank_movies,
-    best_rated_sci_fi_movies,
-    uma_thurman_tarantino_movies,
 )
 from app.utils.data_quality import check_not_empty, check_no_nulls
 from pyspark.sql.functions import col
 
 
-
-
 def run() -> None:
-    spark = get_spark_session()
+    """
+    Run the TMDB batch pipeline (Bronze -> Silver -> Gold).
+    """
+    spark = None
     logger = get_logger("tmdb-pipeline")
-    
+
     silver_path = os.getenv(
         "TMDB_SILVER_PATH",
         "/opt/app/data/processed/movies_enriched"
@@ -43,22 +42,24 @@ def run() -> None:
         "TMDB_GOLD_PATH",
         "/opt/app/data/processed/analytics"
     )
-    
+
+    debug_mode = os.getenv("TMDB_DEBUG", "false").lower() in {"1", "true", "yes"}
 
     try:
+        spark = get_spark_session()
         logger.info("TMDB pipeline started")
 
         # --------------------------------------------------
         # STAGE 1: Load raw data (Bronze)
         # --------------------------------------------------
-        logger.info("Lodading TMDB raw data")
-        
+        logger.info("Loading TMDB raw data")
+
         raw_df = load_tmdb_movies(spark)
-        
-        raw_df.printSchema()
-        raw_df.show(5, truncate=False)
-        raw_df.select("id").show(5)
-        raw_df.count()
+        if debug_mode:
+            raw_df.printSchema()
+            raw_df.show(5, truncate=False)
+            raw_df.select("id").show(5)
+            raw_df.count()
         check_not_empty(raw_df, "raw_movies")
 
         # --------------------------------------------------
@@ -111,7 +112,7 @@ def run() -> None:
             kpi_df.filter(col("budget_musd") >= 10),
             metric="roi",
             n=10,
-            kpi_label="Highest ROI (Budget ≥ 10M)"
+            kpi_label="Highest ROI (Budget >= 10M)"
         )
 
         # --------------------------------------------------
@@ -140,7 +141,8 @@ def run() -> None:
         raise
 
     finally:
-        spark.stop()
+        if spark is not None:
+            spark.stop()
 
 
 
