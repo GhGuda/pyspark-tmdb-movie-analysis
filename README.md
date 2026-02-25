@@ -25,7 +25,7 @@ data/
   plots/                Generated PNG plots
 
 Environment Variables
-Create a .env file with the following entries:
+Create a `.env` file (copy from `.env.example`) with the following entries:
 TMDB_API_KEY=your_api_key_here
 TMDB_BASE_URL=https://api.themoviedb.org/3/movie/
 TMDB_MOVIE_IDS=299534,19995,140607
