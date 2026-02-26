@@ -12,7 +12,7 @@ from pyspark.sql.types import (
 import os
 
 
-def _tmdb_schema() -> StructType:
+def tmdb_schema() -> StructType:
     """
     Defines the schema for TMDB movie data.
 
@@ -79,6 +79,13 @@ def _tmdb_schema() -> StructType:
     ])
 
 
+def tmdb_raw_schema() -> StructType:
+    """
+    Public accessor for the TMDB raw schema.
+    """
+    return tmdb_schema()
+
+
 def load_tmdb_movies(spark: SparkSession) -> DataFrame:
     """
     Loads TMDB movie data into a Spark DataFrame.
@@ -96,7 +103,7 @@ def load_tmdb_movies(spark: SparkSession) -> DataFrame:
 
     df = (
         spark.read
-        .schema(_tmdb_schema())
+        .schema(tmdb_schema())
         .option("multiLine", "true")
         .json(raw_path)
     )
