@@ -100,3 +100,10 @@ The pipeline enforces:
 Notes
 - Spark writes Parquet as directories, not single files.
 - Container paths (/opt/app/...) can be overridden locally via env vars.
+
+Testing
+Install dev dependencies:
+pip install -r requirements.dev.txt
+
+Run tests:
+pytest -q
