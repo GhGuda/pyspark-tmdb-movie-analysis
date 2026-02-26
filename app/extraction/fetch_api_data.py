@@ -6,8 +6,8 @@ from typing import Iterable
 
 import requests
 
-from configs import settings
-from app.extraction.helper import save_json
+from app.configs import settings
+from app.extraction.helpers import save_json
 from app.utils.logging import get_logger
 
 
